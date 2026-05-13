@@ -61,7 +61,10 @@
     {
       "step": 7,
       "name": "shell-components",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T18:36:23+0900",
+      "completed_at": "2026-05-13T18:40:32+0900",
+      "summary": "shell 6종: Header, Footer, ErrorBoundary(class), Toast(4s), OfflineBanner(useOnlineStatus), AriaLive. PRD 카피 SSOT 준수."
     },
     {
       "step": 8,
