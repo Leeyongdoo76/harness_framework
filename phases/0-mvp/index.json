@@ -79,7 +79,7 @@
       "name": "result-flow-components",
       "status": "completed",
       "started_at": "2026-05-13T18:48:01+0900",
-      "completed_at": "2026-05-13T19:05:00+0900",
+      "completed_at": "2026-05-13T18:54:33+0900",
       "summary": "result-flow 9종: Dashboard, 6 cards, ErrorBanner, EmptyState. 차트 텍스트 대안 + 신뢰도 + 면책 + 색 외 표현."
     },
     {
