@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where claude *)",
+      "Bash(where python3 *)",
+      "Bash(where node *)",
+      "Bash(where npm *)",
+      "Bash(python scripts/guard.py)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(python scripts/stop_check.py)",
+      "Bash(python -c \"import pytest; print\\(pytest.__version__\\)\")",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, 'scripts'\\); import execute; print\\('execute.py OK'\\); print\\('DEFAULT_TIMEOUT_SECONDS:', execute.StepExecutor.DEFAULT_TIMEOUT_SECONDS\\)\")",
+      "Bash(python -m py_compile scripts/test_execute.py)",
+      "Bash(python -c \"import shutil; print\\('claude resolved to:', shutil.which\\('claude'\\)\\)\")",
+      "Bash(python scripts/test_hooks.py)",
+      "Skill(codex:rescue)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0,'scripts'\\); import execute; print\\('execute.py OK'\\)\")",
+      "Skill(codex:setup)",
+      "Bash(python *)"
+    ]
+  }
+}

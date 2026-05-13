@@ -70,6 +70,7 @@
 - `steps[].step`: 0부터 시작하는 순번.
 - `steps[].name`: kebab-case slug.
 - `steps[].status`: 초기값은 모두 `"pending"`.
+- `steps[].timeout_seconds` *(선택)*: 해당 step 의 Claude 호출 timeout(초). 생략 시 기본 1800. npm install 등 오래 걸리는 step(부트스트랩 등)에만 명시한다.
 
 상태 전이와 자동 기록 필드:
 
@@ -129,12 +130,40 @@ npm test        # 테스트 통과
 - 기존 테스트를 깨뜨리지 마라
 ```
 
+#### D-4. 부트스트랩 step (첫 phase 의 step 0)
+
+프로젝트가 아직 부트스트랩되어 있지 않으면 (`package.json` 없음) 첫 phase 의 step 0 은 반드시 부트스트랩이다. 이름은 `project-setup`. 이 step 의 AC 는 `npm test` 가 아니라 "필수 npm 스크립트 5개(`dev`/`build`/`preview`/`lint`/`test`) 가 존재하고 실행 가능"이다.
+
+부트스트랩 step 의 작업 예시 (Vite 템플릿 기준):
+
+```bash
+npm create vite@latest . -- --template react-ts
+npm install
+npm install -D tailwindcss postcss autoprefixer vitest @testing-library/react @testing-library/user-event happy-dom @vitejs/plugin-react zod
+npx tailwindcss init -p
+# 이후 tailwind.config.js, index.css, vite.config.ts, tsconfig.json, package.json scripts 설정
+```
+
+부트스트랩 step 의 AC 예시:
+
+```bash
+test -f package.json
+npm run build
+npm test -- --run
+```
+
+이 step 이 끝난 뒤부터 일반적인 step 템플릿(D-3) 의 AC(`npm run build && npm test`) 가 유효해진다.
+
 ### E. 실행
 
 ```bash
-python3 scripts/execute.py {task-name}        # 순차 실행
-python3 scripts/execute.py {task-name} --push  # 실행 후 push
+# Windows / macOS / Linux 공통
+python scripts/execute.py {task-name}         # 순차 실행
+python scripts/execute.py {task-name} --push  # 실행 후 push
 ```
+
+- Windows: `python` (PATH 에 등록되어 있다고 가정). 만약 `py launcher` 만 있다면 `py -3 scripts/execute.py ...` 로 대체.
+- macOS / Linux: 시스템에 따라 `python3` 가 필요할 수 있다. 위 명령이 동작하지 않으면 `python3 scripts/execute.py ...` 로 시도.
 
 execute.py가 자동으로 처리하는 것:
 

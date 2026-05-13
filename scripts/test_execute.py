@@ -433,7 +433,8 @@ class TestInvokeClaude:
             output = executor._invoke_claude(step, preamble)
 
         cmd = mock_run.call_args[0][0]
-        assert cmd[0] == "claude"
+        # shutil.which("claude") 결과(.cmd/.exe 절대경로) 또는 "claude" 자체.
+        assert "claude" in Path(cmd[0]).name
         assert "-p" in cmd
         assert "--dangerously-skip-permissions" in cmd
         assert "--output-format" in cmd
@@ -460,7 +461,7 @@ class TestInvokeClaude:
             executor._invoke_claude(step, "preamble")
         assert exc_info.value.code == 1
 
-    def test_timeout_is_1800(self, executor):
+    def test_timeout_default_is_1800(self, executor):
         mock_result = MagicMock(returncode=0, stdout="{}", stderr="")
         step = {"step": 2, "name": "ui"}
 
@@ -468,6 +469,26 @@ class TestInvokeClaude:
             executor._invoke_claude(step, "preamble")
 
         assert mock_run.call_args[1]["timeout"] == 1800
+
+    def test_timeout_can_be_overridden_per_step(self, executor):
+        mock_result = MagicMock(returncode=0, stdout="{}", stderr="")
+        step = {"step": 2, "name": "ui", "timeout_seconds": 3600}
+
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            executor._invoke_claude(step, "preamble")
+
+        assert mock_run.call_args[1]["timeout"] == 3600
+
+    def test_missing_claude_cli_exits_with_friendly_message(self, executor, capsys):
+        """claude CLI 가 PATH 에 없으면 FileNotFoundError 대신 친절한 메시지로 종료."""
+        step = {"step": 2, "name": "ui"}
+        with patch.object(ex.shutil, "which", return_value=None):
+            with pytest.raises(SystemExit) as exc_info:
+                executor._invoke_claude(step, "preamble")
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "claude CLI" in captured.out
+        assert "PATH" in captured.out
 
 
 # ---------------------------------------------------------------------------

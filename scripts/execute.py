@@ -10,6 +10,7 @@ import argparse
 import contextlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -54,6 +55,7 @@ class StepExecutor:
     """Phase 디렉토리 안의 step들을 순차 실행하는 하네스."""
 
     MAX_RETRIES = 3
+    DEFAULT_TIMEOUT_SECONDS = 1800
     FEAT_MSG = "feat({phase}): step {num} — {name}"
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
@@ -178,11 +180,11 @@ class StepExecutor:
         sections = []
         claude_md = ROOT / "CLAUDE.md"
         if claude_md.exists():
-            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text()}")
+            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text(encoding="utf-8")}")
         docs_dir = ROOT / "docs"
         if docs_dir.is_dir():
             for doc in sorted(docs_dir.glob("*.md")):
-                sections.append(f"## {doc.stem}\n\n{doc.read_text()}")
+                sections.append(f"## {doc.stem}\n\n{doc.read_text(encoding="utf-8")}")
         return "\n\n---\n\n".join(sections) if sections else ""
 
     @staticmethod
@@ -234,10 +236,20 @@ class StepExecutor:
             print(f"  ERROR: {step_file} not found")
             sys.exit(1)
 
-        prompt = preamble + step_file.read_text()
+        timeout = int(step.get("timeout_seconds") or self.DEFAULT_TIMEOUT_SECONDS)
+        claude_bin = shutil.which("claude")
+        if claude_bin is None:
+            print("  ERROR: claude CLI 를 PATH 에서 찾을 수 없습니다.")
+            print("  https://docs.anthropic.com/claude/docs/claude-code 를 참고하여 설치 후 PATH 에 등록하세요.")
+            sys.exit(1)
+
+        prompt = preamble + step_file.read_text(encoding="utf-8")
+        # prompt를 명령 인자가 아닌 stdin으로 전달 (Windows 명령줄 길이 한도 우회)
         result = subprocess.run(
-            ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json", prompt],
-            cwd=self._root, capture_output=True, text=True, timeout=1800,
+            [claude_bin, "-p", "--dangerously-skip-permissions", "--output-format", "json"],
+            input=prompt,
+            cwd=self._root, capture_output=True, text=True, timeout=timeout,
+            encoding="utf-8",
         )
 
         if result.returncode != 0:
@@ -251,7 +263,7 @@ class StepExecutor:
             "stdout": result.stdout, "stderr": result.stderr,
         }
         out_path = self._phase_dir / f"step{step_num}-output.json"
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding="utf-8") as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
 
         return output
