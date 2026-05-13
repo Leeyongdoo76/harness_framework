@@ -99,5 +99,6 @@
       "summary": "Playwright e2e smoke 4종 (smoke / hash-restore / mobile-viewport / csp-console) + fixture 3종 (youtube-meta, youtube-comments 50개, claude-report) + verification-report.md 작성. build/lint/vitest(369) PASS. **Playwright 4/4 FAIL — 단일 원인: production CSP 가 services/youtube.ts 의 www.googleapis.com 호출을 차단 (index.html 의 connect-src 는 youtube.googleapis.com 만 허용). BLOCKER. 후속 phase 에서 CSP 한 줄 수정 필요 (verification-report.md Finding #1).** ADR-032 의 가치 즉시 입증 — happy-dom 단위 테스트로는 잡히지 않던 production CSP 회귀를 첫 e2e 실행이 catch."
     }
   ],
-  "created_at": "2026-05-13T17:40:14+0900"
+  "created_at": "2026-05-13T17:40:14+0900",
+  "completed_at": "2026-05-13T19:16:16+0900"
 }
