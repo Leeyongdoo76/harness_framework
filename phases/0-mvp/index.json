@@ -47,7 +47,7 @@
       "name": "service-claude",
       "status": "completed",
       "started_at": "2026-05-13T18:23:45+0900",
-      "completed_at": "2026-05-13T18:31:01+0900",
+      "completed_at": "2026-05-13T18:31:36+0900",
       "summary": "services/claude.ts: Haiku 4.5 + dangerouslyAllowBrowser + system string (cache_control 폐기, ADR-003). zod + 1회 스키마 재시도 + truncation + evidence 필터 + PII 마스킹. fixture 5종 PASS."
     },
     {
