@@ -8,7 +8,7 @@
       "status": "completed",
       "started_at": "2026-05-13T17:40:14+0900",
       "completed_at": "2026-05-13T17:48:47+0900",
-      "summary": "Vite + React 18 + TS strict + Tailwind + 도구 체인 설치. Playwright chromium 설치. CSP/reduce-motion 적용. PoC 스크립트 scripts/anthropic-poc.ts 작성. **PoC 미검증 — step 5 시작 전 사용자가 'ANTHROPIC_API_KEY=sk-ant-... npm run poc' 수동 실행 후 결과(첫 호출 200 OK + 두 번째 cache_read_input_tokens > 0)를 이 summary 끝에 추가해야 함. 미기록 시 step 5가 blocked로 자동 종료된다.**"
+      "summary": "Vite + React 18 + TS strict + Tailwind + 도구 체인 설치. Playwright chromium 설치. CSP/reduce-motion 적용. PoC 스크립트 scripts/anthropic-poc.ts 작성. **PoC 검증 완료 (2026-05-13)**: Scenario A (실제 SYSTEM_PROMPT 952chars / 604 tokens) → cache_creation=0, cache_read=0, 캐시 임계값 미달로 FAIL. Scenario B (Padded 21636chars / 14432 tokens) → cache_creation=14432, cache_read=14432, OK. dangerouslyAllowBrowser + system content block 호출 자체는 정상. **ADR-003 갱신**: prompt caching 폐기, system 을 단순 string 으로 전달. step 5는 cache 무관하게 정상 진행 가능."
     },
     {
       "step": 1,
@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "lib-hooks",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T18:15:32+0900",
+      "completed_at": "2026-05-13T18:20:48+0900",
+      "summary": "React hook 5종: useApiKeys(useSyncExternalStore), useOnlineStatus, useUrlHash(replaceState), useDocumentTitle, useFocusTrap(allowEscape 옵션)."
     },
     {
       "step": 4,
