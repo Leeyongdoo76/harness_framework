@@ -15,7 +15,7 @@
       "name": "domain-types",
       "status": "completed",
       "started_at": "2026-05-13T17:50:57+0900",
-      "completed_at": "2026-05-13T17:56:30+0900",
+      "completed_at": "2026-05-13T17:56:48+0900",
       "summary": "도메인 타입/스키마/에러 17종 정의. src/types/* 6개 파일(report, videoMeta, youtube, errors, appState, copy) + report/errors 테스트 36건. AC(build/lint/test) 통과."
     },
     {
