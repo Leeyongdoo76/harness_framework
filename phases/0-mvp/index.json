@@ -55,7 +55,7 @@
       "name": "reducer-and-orchestrator",
       "status": "completed",
       "started_at": "2026-05-13T18:31:36+0900",
-      "completed_at": "2026-05-13T18:40:00+0900",
+      "completed_at": "2026-05-13T18:36:23+0900",
       "summary": "reducer (상태 머신 + error 중첩 방지 + KEYS_SAVED 자동 복귀) + orchestrator (캐시 → fetch → analyze → 저장). 매트릭스 + 흐름 테스트 통과."
     },
     {
