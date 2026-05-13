@@ -69,7 +69,10 @@
     {
       "step": 8,
       "name": "input-flow-components",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T18:41:03+0900",
+      "completed_at": "2026-05-13T18:47:30+0900",
+      "summary": "input-flow 5종: UrlInput(blur/Enter), VideoMetaPreview(3분기), ApiKeyModal(focus trap + 가이드 토글 + clear all), ConfirmDialog, ProgressIndicator(2 phase + cancel)."
     },
     {
       "step": 9,
