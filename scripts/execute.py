@@ -22,6 +22,12 @@ from typing import Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Windows console UTF-8 보장 — em dash 같은 비-cp949 문자가 print에서 깨지지 않게
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 @contextlib.contextmanager
 def progress_indicator(label: str):
@@ -249,7 +255,7 @@ class StepExecutor:
             [claude_bin, "-p", "--dangerously-skip-permissions", "--output-format", "json"],
             input=prompt,
             cwd=self._root, capture_output=True, text=True, timeout=timeout,
-            encoding="utf-8",
+            encoding="utf-8", errors="replace",
         )
 
         if result.returncode != 0:
