@@ -12,7 +12,7 @@
 
 특히 다음 ADR을 자세히 확인하라:
 - **ADR-001** Vite + React + TypeScript 스택
-- **ADR-003** Claude Haiku 4.5 + system content block 배열 + `cache_control: ephemeral`
+- **ADR-003** Claude Haiku 4.5 + system string (cache_control 폐기, PoC 검증 결과)
 - **ADR-016** 매 step AC에 build + test + lint
 - **ADR-017** TypeScript strict 옵션
 - **ADR-018** CSP 메타 태그
@@ -233,6 +233,6 @@ ANTHROPIC_API_KEY=sk-ant-... npm run poc
 - **`any` 사용 금지, non-null assertion (`!`) 금지.** 이유: ADR-017.
 - **CSP 메타 태그의 화이트리스트를 임의로 완화하지 마라** (`unsafe-eval` 추가 등). 이유: ADR-018.
 - **다른 패키지 매니저(yarn, pnpm) 사용 금지.** npm 고정. 이유: CLAUDE.md (lock 파일 단일화).
-- **시스템 프롬프트를 문자열로 보내지 마라 (`system: "..."`).** content block 배열만. 이유: ADR-003 (문자열에는 `cache_control` 부착 불가).
+- **임의로 `cache_control` 부착 금지.** ADR-003 — PoC 결과 우리 SYSTEM_PROMPT 가 캐시 임계값 미달이라 부착해도 캐시 동작 안 함. system 은 단순 string 으로 전달.
 - **`src/` 하위에 services/lib/components 파일을 미리 만들지 마라.** 이 step은 부트스트랩 + 빈 App.tsx만. 실제 모듈은 step 1부터. 이유: 자기완결성 — 후속 step이 자기 영역을 만든다.
 - **존재하는 기존 docs/CLAUDE.md를 수정하지 마라.** 이 step은 코드 추가만. 이유: 가드레일 변경 금지.

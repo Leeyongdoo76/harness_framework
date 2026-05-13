@@ -15,18 +15,23 @@ MVP 속도 최우선. 서버·로그인·DB 없는 정적 SPA. 외부 의존성 
 **이유**: 서버 없는 제약에서 비용 분산과 키 보호 양립.
 **트레이드오프**: 진입 장벽 — 발급 가이드로 완화.
 
-### ADR-003: Claude Haiku 4.5 + 시스템 프롬프트 캐싱 (content block 배열 형식)
-**결정**: 모델 `claude-haiku-4-5-20251001`. system은 **content block 배열** 형식으로 보낸다:
+### ADR-003: Claude Haiku 4.5 + prompt caching 폐기 (PoC 검증 후 갱신, 2026-05-13)
+**결정**: 모델 `claude-haiku-4-5-20251001`. system 은 **단순 string** 으로 전달한다. **`cache_control` (prompt caching) 은 사용하지 않는다.**
+
 ```ts
-system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }]
+system: SYSTEM_PROMPT  // string
 ```
-- `cache_control`은 system 문자열이 아닌 **content block에 부착**해야 캐시 동작 (Anthropic API 명세).
-- 캐시 TTL 5분.
-- step 0 PoC에서 실제 캐시 hit 응답(`cache_read_input_tokens`)을 확인하여 작동 검증.
 
-**이유**: 댓글 100개 분석에 Haiku 4.5의 품질·비용·속도 균형 최적. 연속 분석 시 캐시 히트로 절감. content block 배열은 SDK 타입과 일치 + 캐시 작동 보장.
+**이유**: step 0 PoC (2026-05-13) 결과 — 실제 SYSTEM_PROMPT (952자 / 604 input tokens) 가 Anthropic 의 캐시 최소 토큰 임계값 (Haiku 기준 약 2048 tokens) 에 미달해 캐시 자체가 생성되지 않음 (`cache_creation_input_tokens: 0`). 21636자 padded 텍스트 (14432 tokens) 로 검증 시 캐시는 정상 동작 — SDK · 모델 · 호출 형식은 문제 없고 토큰 수만 부족.
 
-**트레이드오프**: SDK 타입 정의에 맞춰야 함. 미묘한 톤 분석 정확도 손실 가능.
+비용 영향: Haiku input $0.80/M tokens × 600 tokens × 100 호출 ≈ $0.048 (캐시 hit 시 $0.005). BYOK 모델에서 사용자 부담 차이로 무의미한 수준. SYSTEM_PROMPT 를 인위적으로 늘리면 첫 호출 비용이 오히려 늘고 응답 품질이 흐트러질 위험이 있어, 캐시 가정을 폐기하는 게 단순.
+
+**PoC 결과 (2026-05-13)**:
+- Scenario A — 실제 SYSTEM_PROMPT (952 chars / 604 tokens): cache_creation=0, cache_read=0 — FAIL
+- Scenario B — Padded (21636 chars / 14432 tokens): cache_creation=14432, cache_read=14432 — OK
+- 결론: SDK + 호출 형식 OK, SYSTEM_PROMPT 토큰 임계값 미달로 캐시 미적용
+
+**트레이드오프**: 미세한 비용 절감 기회 포기. 향후 SYSTEM_PROMPT 가 자연스럽게 2048+ 토큰으로 늘어나면 (분석 가이드 강화, few-shot 사례 추가 등) cache_control 재도입 검토 가능.
 
 ### ADR-004: 댓글 100개 / 톱-레벨만 / order=relevance / pageToken 미사용
 **결정**: `commentThreads.list`, `maxResults=100` (한 페이지 최대), `order=relevance`, top-level only, **`pageToken` 사용 안 함** — 첫 응답 페이지만 분석.
@@ -219,7 +224,7 @@ font-src 'self';
 - step 0의 부트스트랩 PoC에서 실제 호출 1회 시도해 다음을 검증:
   1. SDK가 브라우저에서 로드/동작하는가
   2. CORS 사전 요청이 통과하는가
-  3. system content block + `cache_control: ephemeral` 응답이 정상 도착하고 `cache_creation_input_tokens`/`cache_read_input_tokens`가 응답 usage에 보이는가
+  3. system 호출이 정상 도착한다 (200 OK). 캐시 동작 자체는 ADR-003 에서 폐기됐으므로 `cache_read_input_tokens` 가 0 이어도 정상이다.
 - PoC 실패 시 step 0를 blocked 처리하고 사용자에게 보고 (CORS 차단/SDK 미지원 등의 경우 BYOK SPA 자체가 성립 안 함).
 - 런타임에 CORS/SDK 차단이 감지되면 `ClaudeBrowserUnsupportedError` (`code: AI_BROWSER_UNSUPPORTED`) 도메인 에러로 사용자에 안내 + 브라우저 호환성 안내 카피.
 

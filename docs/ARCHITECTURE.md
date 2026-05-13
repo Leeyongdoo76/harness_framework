@@ -201,7 +201,7 @@ empty → metaLoading            : URL_CHANGED with new videoId
   ↓
   ↓ services/claude.ts: analyzeComments(comments, anthKey, signal)
   │   - SDK 옵션: { dangerouslyAllowBrowser: true }
-  │   - system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }]
+  │   - system: SYSTEM_PROMPT (string. ADR-003 — cache_control 미사용)
   │   - token 초과 → top-50 truncation 1회 / schema 실패 → 1회 retry
   ↓
   ↓ types/report.ts: ReportSchema.parse → Report
@@ -445,13 +445,7 @@ const client = new Anthropic({
 await client.messages.create({
   model: "claude-haiku-4-5-20251001",
   max_tokens: 4096,
-  system: [
-    {
-      type: "text",
-      text: SYSTEM_PROMPT,
-      cache_control: { type: "ephemeral" },  // content block에 부착해야 캐시됨
-    },
-  ],
+  system: SYSTEM_PROMPT,  // string. ADR-003 — cache_control 미사용 (SYSTEM_PROMPT 가 캐시 임계값 미달, PoC 검증)
   messages: [
     {
       role: "user",
@@ -514,7 +508,7 @@ await client.messages.create({
 ## 토큰 / 비용 관리
 
 - 댓글 100개 평균 input ~10K, output ~2K → Haiku 4.5 저렴
-- system content block에 cache_control로 캐시 (5분 TTL)
+- prompt caching 미사용 (ADR-003 — SYSTEM_PROMPT 가 캐시 임계값 미달, 비용 차이 무의미)
 - 토큰 한도 초과 응답 → likeCount 내림차순 상위 50개로 자르고 1회 재시도
 - Report에 `truncatedCount?: number` (services 후처리로 추가)
 

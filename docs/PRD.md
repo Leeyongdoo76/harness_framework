@@ -41,7 +41,7 @@
 ### 4. AI 분석 (Claude Haiku 4.5)
 - 모델: `claude-haiku-4-5-20251001`
 - Anthropic SDK 옵션: `dangerouslyAllowBrowser: true` (BYOK 브라우저 호출 — ADR-031 참조)
-- system은 **content block 배열** 형식: `[{ type: "text", text: "...분석 지침...", cache_control: { type: "ephemeral" } }]`
+- system 은 단순 string (분석 지침 그대로). prompt caching 미사용 — ADR-003 (PoC 결과 SYSTEM_PROMPT 가 캐시 임계값 미달).
 - 응답은 JSON, zod 검증, 실패 시 1회 재시도
 - 출력: 요약 / 감지 언어 / 센티멘트 분포 / 강점 / 개선점 / 키워드 / 주목 댓글
 
