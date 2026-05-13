@@ -31,7 +31,7 @@
       "name": "lib-hooks",
       "status": "completed",
       "started_at": "2026-05-13T18:15:32+0900",
-      "completed_at": "2026-05-13T18:20:48+0900",
+      "completed_at": "2026-05-13T18:19:18+0900",
       "summary": "React hook 5종: useApiKeys(useSyncExternalStore), useOnlineStatus, useUrlHash(replaceState), useDocumentTitle, useFocusTrap(allowEscape 옵션)."
     },
     {
