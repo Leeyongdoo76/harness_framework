@@ -7,13 +7,16 @@
       "name": "project-setup",
       "status": "completed",
       "started_at": "2026-05-13T17:40:14+0900",
-      "completed_at": "2026-05-13T17:47:30+0900",
+      "completed_at": "2026-05-13T17:48:47+0900",
       "summary": "Vite + React 18 + TS strict + Tailwind + 도구 체인 설치. Playwright chromium 설치. CSP/reduce-motion 적용. PoC 스크립트 scripts/anthropic-poc.ts 작성. **PoC 미검증 — step 5 시작 전 사용자가 'ANTHROPIC_API_KEY=sk-ant-... npm run poc' 수동 실행 후 결과(첫 호출 200 OK + 두 번째 cache_read_input_tokens > 0)를 이 summary 끝에 추가해야 함. 미기록 시 step 5가 blocked로 자동 종료된다.**"
     },
     {
       "step": 1,
       "name": "domain-types",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T17:50:57+0900",
+      "completed_at": "2026-05-13T17:56:30+0900",
+      "summary": "도메인 타입/스키마/에러 17종 정의. src/types/* 6개 파일(report, videoMeta, youtube, errors, appState, copy) + report/errors 테스트 36건. AC(build/lint/test) 통과."
     },
     {
       "step": 2,
