@@ -1,0 +1,20 @@
+{
+  "id": "msg_test_01abc",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5-20251001",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"summary\":\"전반적으로 긍정적인 반응이 많으며, 편집 품질과 친절한 설명에 대한 호평이 두드러집니다.\",\"detectedLanguage\":\"ko\",\"sentiment\":{\"positive\":78,\"neutral\":15,\"negative\":7},\"strengths\":[{\"point\":\"편집 품질이 뛰어나다\",\"evidence\":[\"편집 진짜 깔끔하네요\",\"편집 퀄리티가 점점 좋아져요\"]},{\"point\":\"설명이 친절하다\",\"evidence\":[\"설명이 친절해서 좋습니다\"]}],\"improvements\":[{\"point\":\"오디오 볼륨 개선 요청\",\"evidence\":[\"오디오가 조금 작아요\"]}],\"keywords\":[{\"term\":\"편집\",\"count\":12,\"sentiment\":\"pos\"},{\"term\":\"설명\",\"count\":6,\"sentiment\":\"pos\"},{\"term\":\"오디오\",\"count\":3,\"sentiment\":\"neg\"}],\"notableComments\":[{\"text\":\"편집 진짜 깔끔하네요\",\"likes\":142,\"author\":\"viewer01\"},{\"text\":\"다음 영상도 기대됩니다\",\"likes\":87,\"author\":\"viewer02\"}]}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 1000,
+    "output_tokens": 500,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
