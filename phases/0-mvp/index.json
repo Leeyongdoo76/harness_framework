@@ -85,7 +85,10 @@
     {
       "step": 10,
       "name": "app-integration",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T18:54:33+0900",
+      "completed_at": "2026-05-13T19:04:00+0900",
+      "summary": "App 통합 완료. reducer + 5 hook + 모든 컴포넌트 + AbortController + hash + title + aria-live + 오프라인 abort. RTL 통합 7종 PASS."
     },
     {
       "step": 11,

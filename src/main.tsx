@@ -1,15 +1,18 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css";
+import "@/index.css";
+import App from "@/App";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error("Root container #root not found in index.html");
+const rootEl = document.getElementById("root");
+if (rootEl === null) {
+  throw new Error("Root element #root not found");
 }
 
-createRoot(container).render(
+createRoot(rootEl).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
