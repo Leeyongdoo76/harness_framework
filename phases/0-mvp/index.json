@@ -1,0 +1,70 @@
+{
+  "project": "YouTube Comment Analyzer",
+  "phase": "0-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "project-setup",
+      "status": "completed",
+      "started_at": "2026-05-13T17:40:14+0900",
+      "completed_at": "2026-05-13T17:47:30+0900",
+      "summary": "Vite + React 18 + TS strict + Tailwind + 도구 체인 설치. Playwright chromium 설치. CSP/reduce-motion 적용. PoC 스크립트 scripts/anthropic-poc.ts 작성. **PoC 미검증 — step 5 시작 전 사용자가 'ANTHROPIC_API_KEY=sk-ant-... npm run poc' 수동 실행 후 결과(첫 호출 200 OK + 두 번째 cache_read_input_tokens > 0)를 이 summary 끝에 추가해야 함. 미기록 시 step 5가 blocked로 자동 종료된다.**"
+    },
+    {
+      "step": 1,
+      "name": "domain-types",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "lib-pure",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "lib-hooks",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "service-youtube",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "service-claude",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "reducer-and-orchestrator",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "shell-components",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "input-flow-components",
+      "status": "pending"
+    },
+    {
+      "step": 9,
+      "name": "result-flow-components",
+      "status": "pending"
+    },
+    {
+      "step": 10,
+      "name": "app-integration",
+      "status": "pending"
+    },
+    {
+      "step": 11,
+      "name": "verification",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-13T17:40:14+0900"
+}

@@ -1,9 +1,48 @@
+# Node / Vite
 node_modules/
-.next/
-out/
-next-env.d.ts
+dist/
+dist-ssr/
+*.local
+
+# Test / coverage
+coverage/
+.vitest/
+
+# TypeScript
 tsconfig.tsbuildinfo
 
-# phase execution outputs
-phases/**/phase*-output.json
+# 환경 변수 (BYOK 모델이지만 혹시 모를 사고 방지)
+.env
+.env.*
+!.env.example
+
+# 로그
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 에디터 / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python (scripts/ 용)
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Harness step 출력 (각 step 의 raw Claude 응답 — 디버깅용, 커밋 안 함)
 phases/**/step*-output.json
+
+# Playwright
+playwright-report/
+test-results/

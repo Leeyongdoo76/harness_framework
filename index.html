@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; connect-src 'self' https://youtube.googleapis.com https://api.anthropic.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://i.ytimg.com data:; font-src 'self';"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="YouTube 영상의 댓글을 자동으로 분석해 크리에이터를 위한 피드백 리포트를 제공합니다."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>YouTube 댓글 분석</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
