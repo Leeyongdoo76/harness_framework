@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "service-youtube",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-13T18:19:18+0900",
+      "completed_at": "2026-05-13T18:23:30+0900",
+      "summary": "services/youtube.ts: fetchVideoMeta + fetchTopComments. 모든 status code → 도메인 에러. pageToken 미사용. textOriginal 사용. AbortSignal 지원. videos.list 재시도 없음, commentThreads 5xx/Network 1회 재시도(maxAttempts=2). 테스트 28건."
     },
     {
       "step": 5,
