@@ -7,7 +7,8 @@
       "name": "shell-and-input-flow",
       "status": "completed",
       "started_at": "2026-05-14T16:26:05+0900",
-      "summary": "first-entry + url-input e2e spec 2종 추가 (총 9 test), verification-report 9개 항목 자동 검증 [x] 마킹"
+      "summary": "first-entry + url-input e2e spec 2종 추가 (총 9 test), verification-report 9개 항목 자동 검증 [x] 마킹",
+      "completed_at": "2026-05-14T16:32:34+0900"
     },
     {
       "step": 1,
