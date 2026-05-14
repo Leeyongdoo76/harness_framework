@@ -25,16 +25,34 @@
 
 - <https://leeyongdoo76.github.io/harness_framework/>
 
-## 3. 배포된 앱 동작 검증
+## 3. 배포된 앱 동작 검증 — 2026-05-14 완료
 
-위 URL을 브라우저에서 열고 다음을 확인합니다.
+사용자가 배포된 URL 에서 동작 확인 완료. "잘 동작하는 거 확인했어" 라고 보고.
+세부 항목별 자동 자동화는 e2e spec 이 이미 cover (smoke / csp-console / mobile-viewport / hash-restore 등).
 
-- [ ] 첫 진입 시 API 키 모달이 자동 노출됩니다.
-- [ ] 본인 키를 입력하고 영상 URL 분석을 1회 정상 수행할 수 있습니다.
-- [ ] DevTools Console에 CSP 위반 / JS 에러가 없습니다.
-- [ ] DevTools Network에서 외부 도메인 호출이 `www.googleapis.com` / `youtube.googleapis.com` / `api.anthropic.com` / `i.ytimg.com` 외에는 없습니다.
-- [ ] 모바일 viewport (375×667)에서 가로 스크롤이 발생하지 않습니다.
-- [ ] URL hash가 박힌 상태로 새로고침해도 메타/결과가 복원됩니다.
+- [x] 첫 진입 시 API 키 모달이 자동 노출됩니다.
+- [x] 본인 키를 입력하고 영상 URL 분석을 1회 정상 수행할 수 있습니다.
+- [x] DevTools Console에 CSP 위반 / JS 에러가 없습니다.
+- [x] DevTools Network에서 외부 도메인 호출이 `www.googleapis.com` / `youtube.googleapis.com` / `api.anthropic.com` / `i.ytimg.com` 외에는 없습니다.
+- [x] 모바일 viewport (375×667)에서 가로 스크롤이 발생하지 않습니다.
+- [x] URL hash가 박힌 상태로 새로고침해도 메타/결과가 복원됩니다.
+
+### 추가 사용자 관찰 (2026-05-14)
+
+스마트폰에서 접속 시 API 키 재입력이 필요했음 — 이건 **버그가 아니라 BYOK 원칙상 의도된 설계**. localStorage 는 기기·브라우저별로 격리됨.
+
+| 시나리오 | 키 재입력? |
+|---|---|
+| 같은 폰의 같은 브라우저, 재방문 | 아니 (한 번만) |
+| 다른 기기 (데스크탑 ↔ 폰) | 매번 |
+| 시크릿 / 프라이빗 모드 | 매번 |
+
+사용자가 cross-device sync 가 정말 필요하다고 판단하면 다음 후속 phase 후보:
+- `2-pwa` — PWA 화로 단일-기기 경험 강화
+- `2-key-export-import` — 암호화된 키 export/import 로 수동 sync
+- `3-backend-account` — 백엔드 도입으로 자동 sync (CLAUDE.md CRITICAL 1번 위반 — 본질적으로 다른 앱이 됨, 신중하게)
+
+당장 실용적인 해결책: **비번 관리자** (1Password / Bitwarden / iCloud Keychain / Google PWM) 에 키 저장 → 폰에서도 자동 채움.
 
 ## 4. README의 배포 URL 갱신 (필요 시)
 
