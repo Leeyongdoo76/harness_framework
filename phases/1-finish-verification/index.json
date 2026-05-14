@@ -2,10 +2,33 @@
   "project": "YouTube Comment Analyzer",
   "phase": "1-finish-verification",
   "steps": [
-    { "step": 0, "name": "shell-and-input-flow", "status": "pending" },
-    { "step": 1, "name": "analyze-result-cache", "status": "pending" },
-    { "step": 2, "name": "offline-and-error-recovery", "status": "pending" },
-    { "step": 3, "name": "a11y-and-page-meta", "status": "pending" },
-    { "step": 4, "name": "privacy-and-final-pass", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "shell-and-input-flow",
+      "status": "completed",
+      "started_at": "2026-05-14T16:26:05+0900",
+      "summary": "first-entry + url-input e2e spec 2종 추가 (총 9 test), verification-report 9개 항목 자동 검증 [x] 마킹"
+    },
+    {
+      "step": 1,
+      "name": "analyze-result-cache",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "offline-and-error-recovery",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "a11y-and-page-meta",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "privacy-and-final-pass",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-14T16:26:05+0900"
 }

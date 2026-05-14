@@ -63,12 +63,14 @@ export async function clearStorage(page: Page): Promise<void> {
   });
 }
 
-export async function enterKeysAndStart(page: Page, videoUrl: string): Promise<void> {
-  const ytInput = page.getByLabel("YouTube Data API 키");
-  const anthInput = page.getByLabel("Anthropic API 키");
-  await ytInput.fill("AIza-test-youtube-key");
-  await anthInput.fill("sk-ant-test-anthropic-key");
+export async function enterKeysOnly(page: Page): Promise<void> {
+  await page.getByLabel("YouTube Data API 키").fill("AIza-test-youtube-key");
+  await page.getByLabel("Anthropic API 키").fill("sk-ant-test-anthropic-key");
   await page.getByRole("button", { name: "저장", exact: true }).click();
+}
+
+export async function enterKeysAndStart(page: Page, videoUrl: string): Promise<void> {
+  await enterKeysOnly(page);
 
   const urlInput = page.getByLabel("YouTube 영상 URL");
   await urlInput.fill(videoUrl);

@@ -19,17 +19,17 @@
 ## 수동 체크리스트
 
 ### 첫 진입
-- [ ] 환영 카피(`welcome.intro`) 1줄 표시
-- [ ] API 키 모달 자동 노출. ESC/배경 클릭 무효
-- [ ] 발급 가이드 토글 펼침/접힘 동작
-- [ ] 두 키 모두 입력해야 "저장" 활성화
-- [ ] "모든 데이터 삭제" → ConfirmDialog → 확정 시 localStorage prefix 4종 모두 삭제
+- [x] 환영 카피(`welcome.intro`) 1줄 표시  ← tests/e2e/first-entry.spec.ts
+- [x] API 키 모달 자동 노출. ESC/배경 클릭 무효  ← tests/e2e/first-entry.spec.ts
+- [x] 발급 가이드 토글 펼침/접힘 동작  ← tests/e2e/first-entry.spec.ts
+- [x] 두 키 모두 입력해야 "저장" 활성화  ← tests/e2e/first-entry.spec.ts
+- [x] "모든 데이터 삭제" → ConfirmDialog → 확정 시 localStorage prefix 4종 모두 삭제  ← tests/e2e/first-entry.spec.ts
 
 ### URL 입력
-- [ ] 잘못된 URL 4종 (도메인/videoId/플레이리스트/채널) → 각 인라인 에러
-- [ ] blur 또는 Enter 시 메타 호출
-- [ ] 같은 videoId 재입력 → 메타 재호출 안 함 (DevTools Network 탭 확인)
-- [ ] 메타 1시간 캐시 — `videometa:{videoId}` 키가 localStorage에 존재
+- [x] 잘못된 URL 4종 (도메인/videoId/플레이리스트/채널) → 각 인라인 에러  ← tests/e2e/url-input.spec.ts
+- [x] blur 또는 Enter 시 메타 호출  ← tests/e2e/url-input.spec.ts
+- [x] 같은 videoId 재입력 → 메타 재호출 안 함 (DevTools Network 탭 확인)  ← tests/e2e/url-input.spec.ts
+- [x] 메타 1시간 캐시 — `videometa:{videoId}` 키가 localStorage에 존재  ← tests/e2e/url-input.spec.ts
 
 ### 분석
 - [ ] 진행 표시 ("댓글 모으는 중…" → "AI 분석 중…")
