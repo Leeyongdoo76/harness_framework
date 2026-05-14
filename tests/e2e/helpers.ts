@@ -47,12 +47,18 @@ export async function mockAll(page: Page): Promise<void> {
 }
 
 export async function clearStorage(page: Page): Promise<void> {
+  // window.name persists across reloads of the same tab, so we use it as a
+  // first-load sentinel — otherwise this init script would also fire on
+  // page.reload() and wipe caches that hash-restore.spec relies on.
   await page.addInitScript(() => {
-    try {
-      window.localStorage.clear();
-      window.sessionStorage.clear();
-    } catch {
-      /* ignore Safari private mode */
+    if (window.name !== "__cleared__") {
+      try {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+      } catch {
+        /* ignore Safari private mode */
+      }
+      window.name = "__cleared__";
     }
   });
 }
