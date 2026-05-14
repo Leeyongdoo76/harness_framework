@@ -32,15 +32,15 @@
 - [x] 메타 1시간 캐시 — `videometa:{videoId}` 키가 localStorage에 존재  ← tests/e2e/url-input.spec.ts
 
 ### 분석
-- [ ] 진행 표시 ("댓글 모으는 중…" → "AI 분석 중…")
-- [ ] "취소" 버튼 → idle 복귀
-- [ ] 결과 6개 카드 모두 fade-in 진입
+- [x] 진행 표시 ("댓글 모으는 중…" → "AI 분석 중…")  ← tests/e2e/analyze-progress.spec.ts
+- [x] "취소" 버튼 → idle 복귀  ← tests/e2e/analyze-progress.spec.ts
+- [x] 결과 6개 카드 모두 fade-in 진입  ← tests/e2e/smoke.spec.ts (6개 카드 heading 가시) + tests/e2e/mobile-viewport.spec.ts (`section.fade-in` count ≥ 6)
 
 ### 결과
-- [ ] 결과 헤더에 분석 시점 + 표본 크기
-- [ ] 면책 카피 하단 노출
-- [ ] 댓글 < 10 시 lowConfidence 경고 (테스트용 mock으로)
-- [ ] 캐시 히트 시 "{시간} 전 분석 · 캐시된 결과" + 재분석 강조
+- [x] 결과 헤더에 분석 시점 + 표본 크기  ← tests/e2e/result-detail.spec.ts
+- [x] 면책 카피 하단 노출  ← tests/e2e/result-detail.spec.ts
+- [x] 댓글 < 10 시 lowConfidence 경고 (테스트용 mock으로)  ← tests/e2e/result-detail.spec.ts (fixture-few)
+- [x] 캐시 히트 시 "{시간} 전 분석 · 캐시된 결과" + 재분석 강조  ← tests/e2e/result-detail.spec.ts (+ hash-restore.spec.ts)
 
 ### 오프라인
 - [ ] DevTools Network → Offline 토글 → 상단 배너 노출

@@ -1,0 +1,10 @@
+{
+  "kind": "youtube#commentThreadListResponse",
+  "items": [
+    { "id": "Ugxf01", "snippet": { "topLevelComment": { "snippet": { "textOriginal": "편집이 깔끔해서 보기 좋아요", "authorDisplayName": "viewer01", "likeCount": 12 } } } },
+    { "id": "Ugxf02", "snippet": { "topLevelComment": { "snippet": { "textOriginal": "설명이 친절해서 이해가 잘 됐어요", "authorDisplayName": "viewer02", "likeCount": 8 } } } },
+    { "id": "Ugxf03", "snippet": { "topLevelComment": { "snippet": { "textOriginal": "오디오가 조금 작아요", "authorDisplayName": "viewer03", "likeCount": 5 } } } },
+    { "id": "Ugxf04", "snippet": { "topLevelComment": { "snippet": { "textOriginal": "다음 영상도 기대됩니다", "authorDisplayName": "viewer04", "likeCount": 3 } } } },
+    { "id": "Ugxf05", "snippet": { "topLevelComment": { "snippet": { "textOriginal": "구독 누르고 갑니다", "authorDisplayName": "viewer05", "likeCount": 1 } } } }
+  ]
+}

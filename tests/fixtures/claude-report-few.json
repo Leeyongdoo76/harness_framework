@@ -1,0 +1,20 @@
+{
+  "id": "msg_test_few_01",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-4-5-20251001",
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"summary\":\"댓글 표본이 적지만 편집과 설명 품질에 대한 호평이 두드러집니다.\",\"detectedLanguage\":\"ko\",\"sentiment\":{\"positive\":70,\"neutral\":20,\"negative\":10},\"strengths\":[{\"point\":\"편집 품질이 뛰어나다\",\"evidence\":[\"편집이 깔끔해서 보기 좋아요\"]},{\"point\":\"설명이 친절하다\",\"evidence\":[\"설명이 친절해서 이해가 잘 됐어요\"]}],\"improvements\":[{\"point\":\"오디오 볼륨 개선 요청\",\"evidence\":[\"오디오가 조금 작아요\"]}],\"keywords\":[{\"term\":\"편집\",\"count\":1,\"sentiment\":\"pos\"},{\"term\":\"설명\",\"count\":1,\"sentiment\":\"pos\"},{\"term\":\"오디오\",\"count\":1,\"sentiment\":\"neg\"}],\"notableComments\":[{\"text\":\"편집이 깔끔해서 보기 좋아요\",\"likes\":12,\"author\":\"viewer01\"},{\"text\":\"설명이 친절해서 이해가 잘 됐어요\",\"likes\":8,\"author\":\"viewer02\"}]}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 500,
+    "output_tokens": 300,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
