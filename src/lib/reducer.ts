@@ -1,5 +1,6 @@
 import { AbortError, isAuthError } from "@/types/errors";
 import type { Action, AppState, VideoId } from "@/types/appState";
+import { getReport } from "./cache";
 
 export type InitialStateOptions = {
   hasKeys: boolean;
@@ -8,6 +9,26 @@ export type InitialStateOptions = {
 
 export function initialState(opts: InitialStateOptions): AppState {
   if (!opts.hasKeys) return { kind: "needs_keys" };
+  // Hash + cache hit → bootstrap straight into result so reload restores the
+  // last analysis without forcing the user to click "분석 시작" again.
+  if (opts.hashVideoId !== undefined) {
+    const cached = getReport(opts.hashVideoId);
+    if (cached !== null) {
+      const next: AppState = {
+        kind: "result",
+        videoId: opts.hashVideoId,
+        report: cached.report,
+        commentCount: cached.commentCount,
+        fromCache: true,
+        cachedAt: cached.createdAt,
+      };
+      if (cached.videoMeta !== undefined) next.videoMeta = cached.videoMeta;
+      if (cached.truncatedCount !== undefined) {
+        next.truncatedCount = cached.truncatedCount;
+      }
+      return next;
+    }
+  }
   return { kind: "idle" };
 }
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   AbortError,
   ClaudeAuthError,
@@ -10,6 +10,7 @@ import type { Report } from "@/types/report";
 import type { VideoMeta } from "@/types/videoMeta";
 import type { Comment } from "@/types/youtube";
 import type { AppState } from "@/types/appState";
+import { setReport } from "./cache";
 import { initialState, reducer } from "./reducer";
 
 const VID = "dQw4w9WgXcQ";
@@ -41,11 +42,44 @@ function makeCtl(): AbortController {
 }
 
 describe("initialState", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("hasKeys=false → needs_keys", () => {
     expect(initialState({ hasKeys: false })).toEqual({ kind: "needs_keys" });
   });
   it("hasKeys=true → idle", () => {
     expect(initialState({ hasKeys: true })).toEqual({ kind: "idle" });
+  });
+  it("hasKeys=true + hashVideoId, no cache → idle", () => {
+    expect(initialState({ hasKeys: true, hashVideoId: VID })).toEqual({
+      kind: "idle",
+    });
+  });
+  it("hasKeys=true + hashVideoId, cache hit → result (fromCache=true)", () => {
+    setReport(VID, { report: REPORT, commentCount: 87, videoMeta: META });
+    const state = initialState({ hasKeys: true, hashVideoId: VID });
+    expect(state.kind).toBe("result");
+    if (state.kind === "result") {
+      expect(state.videoId).toBe(VID);
+      expect(state.fromCache).toBe(true);
+      expect(state.report).toEqual(REPORT);
+      expect(state.commentCount).toBe(87);
+      expect(state.videoMeta).toEqual(META);
+      expect(typeof state.cachedAt).toBe("string");
+    }
+  });
+  it("hashVideoId with truncatedCount in cache → carries truncatedCount", () => {
+    setReport(VID, {
+      report: REPORT,
+      commentCount: 100,
+      truncatedCount: 5,
+    });
+    const state = initialState({ hasKeys: true, hashVideoId: VID });
+    if (state.kind === "result") {
+      expect(state.truncatedCount).toBe(5);
+    }
   });
 });
 
