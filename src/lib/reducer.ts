@@ -170,7 +170,25 @@ export function reducer(state: AppState, action: Action): AppState {
 
     case "RESET_ERROR": {
       if (state.kind !== "error") return state;
-      return state.previous;
+      const prev = state.previous;
+      // Errors raised during the analyze pipeline (fetch/analyze/validate)
+      // need to re-enter `validating` so Effect 3 actually re-runs. Returning
+      // prev verbatim would leave the UI showing "분석 중" while no work is
+      // in flight — a zombie progress state.
+      if (
+        prev.kind === "fetching" ||
+        prev.kind === "analyzing" ||
+        prev.kind === "validating"
+      ) {
+        const next: AppState = {
+          kind: "validating",
+          videoId: prev.videoId,
+          force: false,
+        };
+        if (prev.videoMeta !== undefined) next.videoMeta = prev.videoMeta;
+        return next;
+      }
+      return prev;
     }
 
     case "REANALYZE": {

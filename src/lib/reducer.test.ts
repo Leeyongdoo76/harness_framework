@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   AbortError,
   ClaudeAuthError,
+  ClaudeSchemaError,
   NetworkError,
   YouTubeAuthError,
   YouTubeServerError,
@@ -269,6 +270,57 @@ describe("reducer — error transitions (ADR-022)", () => {
       previous: prev,
     };
     expect(reducer(errState, { type: "RESET_ERROR" })).toBe(prev);
+  });
+
+  it("RESET_ERROR after analyzing → re-enters validating (not zombie analyzing)", () => {
+    const errState: AppState = {
+      kind: "error",
+      error: new ClaudeSchemaError("schema retry failed"),
+      previous: {
+        kind: "analyzing",
+        videoId: VID,
+        videoMeta: META,
+        comments: COMMENTS,
+        controller: makeCtl(),
+      },
+    };
+    const next = reducer(errState, { type: "RESET_ERROR" });
+    expect(next).toEqual({
+      kind: "validating",
+      videoId: VID,
+      videoMeta: META,
+      force: false,
+    });
+  });
+
+  it("RESET_ERROR after fetching → re-enters validating", () => {
+    const errState: AppState = {
+      kind: "error",
+      error: new YouTubeServerError("5xx"),
+      previous: {
+        kind: "fetching",
+        videoId: VID,
+        videoMeta: META,
+        controller: makeCtl(),
+      },
+    };
+    const next = reducer(errState, { type: "RESET_ERROR" });
+    expect(next).toEqual({
+      kind: "validating",
+      videoId: VID,
+      videoMeta: META,
+      force: false,
+    });
+  });
+
+  it("RESET_ERROR after validating (no meta) → re-enters validating without meta", () => {
+    const errState: AppState = {
+      kind: "error",
+      error: new NetworkError("net"),
+      previous: { kind: "validating", videoId: VID, force: false },
+    };
+    const next = reducer(errState, { type: "RESET_ERROR" });
+    expect(next).toEqual({ kind: "validating", videoId: VID, force: false });
   });
 
   it("KEYS_SAVED on auth error → previous (YouTubeAuthError)", () => {
