@@ -6,14 +6,15 @@
 ## 자동 (Playwright smoke 4종)
 
 - [x] `npx playwright test tests/e2e/smoke.spec.ts` PASS
-- [ ] `npx playwright test tests/e2e/hash-restore.spec.ts` PASS — Finding #3 참고
+- [x] `npx playwright test tests/e2e/hash-restore.spec.ts` PASS
 - [x] `npx playwright test tests/e2e/mobile-viewport.spec.ts` PASS
 - [x] `npx playwright test tests/e2e/csp-console.spec.ts` PASS
 
-**현재 상태** (2026-05-14 재실행, CSP fix 적용 후): 3/4 PASS, 1/4 FAIL.
+**현재 상태** (2026-05-14, Finding #1 + #3 fix 적용 후): **4/4 PASS**.
 
-- Finding #1 (CSP) 은 **RESOLVED** — `https://www.googleapis.com` 을 `connect-src` 에 추가하는 fix 가 적용돼 smoke / mobile-viewport / csp-console 3종이 GREEN.
-- hash-restore 1종은 별개 원인으로 여전히 FAIL — 아래 **Finding #3** 참고. (step 11 의 "4/4 동일 원인" 진단은 부분적으로 부정확했음. CSP 차단이 가장 먼저 터지면서 그 뒤의 reload 단계까지 도달하지 못했고, 4건이 같은 stack 으로 죽어 보였던 것.)
+- Finding #1 (CSP) RESOLVED.
+- Finding #3 (hash-restore 의 cascading 두 원인 — e2e helper + 제품의 hash 부트스트랩 캐시 미조회) RESOLVED.
+- step 11 의 "4/4 동일 원인" 진단은 부분적으로 부정확했음. CSP 차단이 가장 먼저 터지면서 그 뒤의 reload 단계까지 도달하지 못해 4건이 같은 stack 으로 죽어 보였던 것.
 
 ## 수동 체크리스트
 
@@ -121,7 +122,9 @@ The action has been blocked.
 
 **권장 수정**: MVP 이후 dynamic import 또는 manualChunks 분리. 후속 phase 후보 (non-blocking).
 
-### Finding #3 — `tests/e2e/helpers.ts::clearStorage` 가 `page.reload()` 후에도 storage 를 또 비움 (HIGH)
+### Finding #3 — hash-restore 의 cascading 두 원인 (HIGH) — RESOLVED (2026-05-14)
+
+**상태**: RESOLVED. 표면 원인(e2e helper)을 고치고 나니 그 뒤에 가려져 있던 제품의 hash 부트스트랩 캐시 미조회 문제가 드러남. 둘 다 적용하고 Playwright 4/4 GREEN, vitest 372 PASS 확인.
 
 **발견 시점**: 2026-05-14, Finding #1 fix 적용 후 Playwright 재실행 중 단독 FAIL 로 드러남.
 
@@ -145,25 +148,30 @@ Error: expect(locator).toBeVisible() failed
 - 다만 hash-restore e2e 가 회귀 안전망 역할을 못 하고 있음. `useUrlHash` 가 깨지면 잡히지 않을 수 있다.
 - step 11 의 verification-report 가 4종을 "동일 원인" 으로 묶은 진단 자체가 부분적으로 부정확했다는 의미도 됨 (CSP 가 먼저 터져 reload 단계까지 도달 못 했던 것).
 
-**권장 수정 (옵션)**:
-- **A. window.name 센티넬** (최소 변경, 권장):
-  ```ts
-  await page.addInitScript(() => {
-    if (window.name !== "__cleared__") {
-      try { localStorage.clear(); sessionStorage.clear(); } catch {}
-      window.name = "__cleared__";
-    }
-  });
-  ```
-  `window.name` 은 동일 탭의 reload / 동일 origin navigation 사이에 보존되므로 최초 1회만 클리어됨. 다른 3종 테스트의 의미(테스트 시작 시 깨끗한 상태)는 유지됨.
-- **B. helper 시그니처 변경**: `clearStorage` 를 `page.evaluate` 기반의 "한 번만 호출되는" 형태로 바꾸고 caller 4개도 갱신. 변경 폭은 크지만 의도가 더 명확함.
+**적용된 수정 (2026-05-14)**:
 
-**우선순위**: HIGH — BLOCKER 는 아님 (제품 동작에는 영향 없음) 이지만 e2e 안전망 1/4 이 작동 안 함. 후속 phase 초기 step 으로 잡기 좋음.
+1) **테스트 인프라**: `tests/e2e/helpers.ts` 의 `clearStorage` 가 `window.name` 센티넬을 사용하도록 변경. 최초 navigation 에서 1회만 storage 를 비우고, 같은 탭의 reload 에서는 보존됨.
+   ```ts
+   await page.addInitScript(() => {
+     if (window.name !== "__cleared__") {
+       try { localStorage.clear(); sessionStorage.clear(); } catch {}
+       window.name = "__cleared__";
+     }
+   });
+   ```
+2) **제품 코드**: `src/lib/reducer.ts::initialState` 에서 `hashVideoId` 가 있고 캐시 hit 이면 곧장 `kind: "result"` 로 부트스트랩하도록 변경. 캐시 miss 인 경우만 `idle` 로 떨어지고 기존 Effect 1 의 `HASH_VIDEO_ID` 경로(메타 로딩 → metaReady)를 탄다. PRD 의 "캐시된 결과 즉시 표시" / "재분석" 동작과 일치.
+3) `src/lib/reducer.test.ts` 에 새 부트스트랩 케이스 3종 추가 (no-cache, cache-hit, with-truncatedCount). 기존 369 → **372 PASS**.
 
-**할당**: 후속 phase (예: `phases/0-mvp-fix-e2e-helpers` 또는 차기 phase 의 첫 step).
+**원인 정리** (왜 표면-원인 fix 만으로는 부족했는가):
+- 표면: e2e helper 가 reload 후 storage 를 또 비워서 캐시가 사라짐.
+- 그 뒤에 가려진 본질: 캐시가 살아있더라도 hash 부트스트랩 경로가 `HASH_VIDEO_ID` → `metaLoading` → `metaReady` 까지만 가고 자동으로 cache 를 조회하지 않았음. 사용자에게 "분석 시작" 재클릭을 강요하는 셈. PRD 의 의도(`캐시 히트 시 캐시된 결과 즉시 표시`)와 불일치.
+
+**검증**: `npm run build && npm run lint && npm test` 모두 PASS. Playwright 4/4 GREEN.
+
+**우선순위**: HIGH — BLOCKER 는 아니었으나 e2e 안전망 1/4 이 작동 안 했고, 사용자 입장에선 PRD 가 약속한 reload 자동 복원이 실제로는 안 됐던 셈.
 
 ## 결론
 
 step 11 의 deliverables (4 specs + 3 fixtures + 이 리포트) 는 모두 작성 완료. Playwright 가 실제 production CSP 환경에서 회귀를 잡아낸 첫 사례 — Finding #1 은 ADR-032 의 가치를 즉시 증명한 셈.
 
-**2026-05-14 갱신**: Finding #1 (CSP BLOCKER) 은 RESOLVED. CSP fix 가 적용되면서 Playwright 3종이 GREEN 으로 전환됐고, 그 과정에서 가려져 있던 e2e 스캐폴딩 버그가 Finding #3 로 드러났음. Finding #3 는 BLOCKER 가 아니지만 후속 phase 초기에 처리되어야 hash-restore 회귀 안전망이 복구됨.
+**2026-05-14 갱신**: Finding #1 (CSP BLOCKER) 과 Finding #3 (cascading: e2e helper + hash 부트스트랩 캐시 미조회) 모두 RESOLVED. Playwright 4/4 GREEN, vitest 372 PASS, lint/build 통과. step 11 의 "4/4 동일 원인" 진단이 부분적으로 부정확했던 이유는 보고서 본문에 정리.
