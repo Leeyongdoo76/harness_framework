@@ -53,18 +53,18 @@
 - [x] 에러 화면 "다시 시도" → previous 실행  ← tests/e2e/error-recovery.spec.ts (Finding #4 회귀 락)
 
 ### 접근성
-- [ ] Tab만으로 모든 동작 가능
-- [ ] focus ring 가시 (모든 인터랙티브 element)
-- [ ] 모달 focus trap (Tab/Shift+Tab wrap)
-- [ ] needs_keys 모달 ESC 무효, edit 모달 ESC 닫힘
-- [ ] OS `prefers-reduced-motion: reduce` 설정 → fade-in 정지
-- [ ] sentiment 차트 옆에 라벨 + 퍼센트 (색 없이 의미 파악)
-- [ ] 키워드 태그가 색 + 카운트 + sentiment 라벨로 의미 전달
+- [ ] Tab만으로 모든 동작 가능 ← step 4 manual pass (시각 흐름 판단)
+- [ ] focus ring 가시 (모든 인터랙티브 element) ← step 4 manual pass (시각 검증)
+- [x] 모달 focus trap (Tab/Shift+Tab wrap)  ← tests/e2e/a11y.spec.ts
+- [x] needs_keys 모달 ESC 무효, edit 모달 ESC 닫힘  ← tests/e2e/a11y.spec.ts (+ first-entry.spec.ts)
+- [x] OS `prefers-reduced-motion: reduce` 설정 → fade-in 정지  ← tests/e2e/a11y.spec.ts (emulateMedia 기반, OS 토글 검증은 step 4 manual pass)
+- [x] sentiment 차트 옆에 라벨 + 퍼센트 (색 없이 의미 파악)  ← tests/e2e/a11y.spec.ts
+- [x] 키워드 태그가 색 + 카운트 + sentiment 라벨로 의미 전달  ← tests/e2e/a11y.spec.ts (aria-label 검증, 색맹 시각 확인은 step 4 manual pass)
 
 ### 페이지 메타
-- [ ] 분석 중 title = "분석 중… - YouTube 댓글 분석"
-- [ ] 결과 도착 title = "{영상 제목} - 분석 결과"
-- [ ] hash가 "분석 시작" 클릭 직후 갱신 (결과 도착 후 아님)
+- [x] 분석 중 title = "분석 중… - YouTube 댓글 분석"  ← tests/e2e/page-meta.spec.ts
+- [x] 결과 도착 title = "{영상 제목} - 분석 결과"  ← tests/e2e/page-meta.spec.ts
+- [x] hash가 "분석 시작" 클릭 직후 갱신 (결과 도착 후 아님)  ← tests/e2e/page-meta.spec.ts
 
 ### 프라이버시
 - [ ] 키 표시는 마스킹 (마지막 4자만)
