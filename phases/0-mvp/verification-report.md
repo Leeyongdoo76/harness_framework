@@ -5,12 +5,15 @@
 
 ## 자동 (Playwright smoke 4종)
 
-- [ ] `npx playwright test tests/e2e/smoke.spec.ts` PASS
-- [ ] `npx playwright test tests/e2e/hash-restore.spec.ts` PASS
-- [ ] `npx playwright test tests/e2e/mobile-viewport.spec.ts` PASS
-- [ ] `npx playwright test tests/e2e/csp-console.spec.ts` PASS
+- [x] `npx playwright test tests/e2e/smoke.spec.ts` PASS
+- [ ] `npx playwright test tests/e2e/hash-restore.spec.ts` PASS — Finding #3 참고
+- [x] `npx playwright test tests/e2e/mobile-viewport.spec.ts` PASS
+- [x] `npx playwright test tests/e2e/csp-console.spec.ts` PASS
 
-**현재 상태**: 4/4 FAIL (모두 동일한 단일 원인). 아래 "발견 사항 #1" 참고.
+**현재 상태** (2026-05-14 재실행, CSP fix 적용 후): 3/4 PASS, 1/4 FAIL.
+
+- Finding #1 (CSP) 은 **RESOLVED** — `https://www.googleapis.com` 을 `connect-src` 에 추가하는 fix 가 적용돼 smoke / mobile-viewport / csp-console 3종이 GREEN.
+- hash-restore 1종은 별개 원인으로 여전히 FAIL — 아래 **Finding #3** 참고. (step 11 의 "4/4 동일 원인" 진단은 부분적으로 부정확했음. CSP 차단이 가장 먼저 터지면서 그 뒤의 reload 단계까지 도달하지 못했고, 4건이 같은 stack 으로 죽어 보였던 것.)
 
 ## 수동 체크리스트
 
@@ -73,7 +76,9 @@
 
 ## 발견 사항
 
-### Finding #1 — Production CSP 가 YouTube API host 차단 (CRITICAL)
+### Finding #1 — Production CSP 가 YouTube API host 차단 (CRITICAL) — RESOLVED (2026-05-14)
+
+**상태**: RESOLVED — `connect-src` 에 `https://www.googleapis.com` 을 추가하는 fix 가 적용됨. Playwright smoke / mobile-viewport / csp-console 3종이 GREEN 으로 전환됨. 후속 발견 사항은 Finding #3 참고.
 
 **증상**: Playwright smoke 4종 모두 동일한 원인으로 FAIL.
 
@@ -95,17 +100,16 @@ The action has been blocked.
 - 실제 사용자가 어떤 URL 을 입력해도 메타 카드가 `[videoId]` fallback 으로만 떨어지고, "분석 시작" 후엔 NetworkError 가 발생한다 (대부분 사용자는 "오프라인인가?" 로 오인할 가능성 큼).
 - 단위/통합 테스트는 happy-dom 이라 CSP 가 미적용 — 그래서 step 1–10 에서 발견되지 못함. ADR-032 (Playwright e2e) 가 정확히 이런 종류의 회귀를 잡는 안전망.
 
-**권장 수정 (후속 phase 에서 처리)**:
-1) `index.html` 의 `connect-src` 에 `https://www.googleapis.com` 추가:
+**적용된 수정 (2026-05-14)**:
+1) `index.html` 의 `connect-src` 에 `https://www.googleapis.com` 추가 (live CSP):
    ```
    connect-src 'self' https://www.googleapis.com https://youtube.googleapis.com https://api.anthropic.com;
    ```
-   (또는 둘 중 하나만 — `www.googleapis.com` 단독)
-2) ADR-018, ARCHITECTURE 의 CSP 예시도 동시 갱신.
+2) CLAUDE.md, docs/ADR.md (ADR-018), docs/ARCHITECTURE.md, phases/0-mvp/step0.md 의 CSP 예시도 동시 갱신해 단일 SSOT 유지.
+
+**검증**: `npm run build && npm run lint && npm test` 모두 PASS (369 unit tests). Playwright 3종 추가 PASS.
 
 **우선순위**: BLOCKER — 이 fix 없이는 production 에서 앱 자체가 동작 안 함.
-
-**할당**: 후속 phase (예: `phases/0-mvp-fix-csp` 또는 `phases/1-...`).
 
 ### Finding #2 — `dist/index.html` 의 chunk 크기 경고
 
@@ -117,6 +121,49 @@ The action has been blocked.
 
 **권장 수정**: MVP 이후 dynamic import 또는 manualChunks 분리. 후속 phase 후보 (non-blocking).
 
+### Finding #3 — `tests/e2e/helpers.ts::clearStorage` 가 `page.reload()` 후에도 storage 를 또 비움 (HIGH)
+
+**발견 시점**: 2026-05-14, Finding #1 fix 적용 후 Playwright 재실행 중 단독 FAIL 로 드러남.
+
+**증상**: `tests/e2e/hash-restore.spec.ts` 만 FAIL.
+```
+Error: expect(locator).toBeVisible() failed
+  Locator: getByRole('heading', { name: '요약' })
+  Expected: visible (after page.reload())
+  Actual: API 키 모달이 다시 노출됨
+```
+`page.reload()` 직후 화면이 결과가 아니라 첫 진입(API 키 모달) 상태로 떨어진다.
+
+**원인**:
+- `tests/e2e/helpers.ts` 의 `clearStorage` 가 `page.addInitScript` 로 등록돼있음.
+- `addInitScript` 는 **모든** 페이지 로드(최초 navigation + 모든 reload + 동일 origin 의 후속 navigation) 직전에 실행됨.
+- 따라서 `page.reload()` 시점에도 localStorage / sessionStorage 가 다시 비워짐 → 분석 결과 캐시 (`reportcache:{videoId}` 등) 와 API 키 (`apikeys`) 모두 소실.
+- hash-restore 테스트는 정의상 reload 후 cache hit 을 검증해야 하므로, 이 helper 와 본질적으로 충돌.
+
+**영향**:
+- 제품 코드에는 결함 없음. 테스트 스캐폴딩만의 버그. → step 10 의 App 통합 동작과 hash-restore 의 제품 요구는 변동 없음.
+- 다만 hash-restore e2e 가 회귀 안전망 역할을 못 하고 있음. `useUrlHash` 가 깨지면 잡히지 않을 수 있다.
+- step 11 의 verification-report 가 4종을 "동일 원인" 으로 묶은 진단 자체가 부분적으로 부정확했다는 의미도 됨 (CSP 가 먼저 터져 reload 단계까지 도달 못 했던 것).
+
+**권장 수정 (옵션)**:
+- **A. window.name 센티넬** (최소 변경, 권장):
+  ```ts
+  await page.addInitScript(() => {
+    if (window.name !== "__cleared__") {
+      try { localStorage.clear(); sessionStorage.clear(); } catch {}
+      window.name = "__cleared__";
+    }
+  });
+  ```
+  `window.name` 은 동일 탭의 reload / 동일 origin navigation 사이에 보존되므로 최초 1회만 클리어됨. 다른 3종 테스트의 의미(테스트 시작 시 깨끗한 상태)는 유지됨.
+- **B. helper 시그니처 변경**: `clearStorage` 를 `page.evaluate` 기반의 "한 번만 호출되는" 형태로 바꾸고 caller 4개도 갱신. 변경 폭은 크지만 의도가 더 명확함.
+
+**우선순위**: HIGH — BLOCKER 는 아님 (제품 동작에는 영향 없음) 이지만 e2e 안전망 1/4 이 작동 안 함. 후속 phase 초기 step 으로 잡기 좋음.
+
+**할당**: 후속 phase (예: `phases/0-mvp-fix-e2e-helpers` 또는 차기 phase 의 첫 step).
+
 ## 결론
 
-step 11 의 deliverables (4 specs + 3 fixtures + 이 리포트) 는 모두 작성 완료. Playwright 가 실제 production CSP 환경에서 회귀를 잡아낸 첫 사례 — Finding #1 은 ADR-032 의 가치를 즉시 증명한 셈. Finding #1 은 BLOCKER 이므로 후속 phase 에서 우선 처리되어야 한다.
+step 11 의 deliverables (4 specs + 3 fixtures + 이 리포트) 는 모두 작성 완료. Playwright 가 실제 production CSP 환경에서 회귀를 잡아낸 첫 사례 — Finding #1 은 ADR-032 의 가치를 즉시 증명한 셈.
+
+**2026-05-14 갱신**: Finding #1 (CSP BLOCKER) 은 RESOLVED. CSP fix 가 적용되면서 Playwright 3종이 GREEN 으로 전환됐고, 그 과정에서 가려져 있던 e2e 스캐폴딩 버그가 Finding #3 로 드러났음. Finding #3 는 BLOCKER 가 아니지만 후속 phase 초기에 처리되어야 hash-restore 회귀 안전망이 복구됨.
