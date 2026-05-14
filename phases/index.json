@@ -4,6 +4,10 @@
       "dir": "0-mvp",
       "status": "completed",
       "completed_at": "2026-05-13T19:16:16+0900"
+    },
+    {
+      "dir": "1-finish-verification",
+      "status": "pending"
     }
   ]
 }

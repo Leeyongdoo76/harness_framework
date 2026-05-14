@@ -1,0 +1,11 @@
+{
+  "project": "YouTube Comment Analyzer",
+  "phase": "1-finish-verification",
+  "steps": [
+    { "step": 0, "name": "shell-and-input-flow", "status": "pending" },
+    { "step": 1, "name": "analyze-result-cache", "status": "pending" },
+    { "step": 2, "name": "offline-and-error-recovery", "status": "pending" },
+    { "step": 3, "name": "a11y-and-page-meta", "status": "pending" },
+    { "step": 4, "name": "privacy-and-final-pass", "status": "pending" }
+  ]
+}
