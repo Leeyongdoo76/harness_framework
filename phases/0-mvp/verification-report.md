@@ -201,11 +201,41 @@ Error: expect(locator).toBeVisible() failed
 **우선순위**: HIGH — UX 데드락 (사용자가 페이지 새로고침 외에는 빠져나갈 수 없음). 실제 키로만 재현돼서 자동 검증 그물을 통과해버린 케이스.
 
 **남은 follow-up (별도)**:
-- 사용자가 마주친 스키마 에러 자체의 빈도를 확인할 필요. 첫 시도에서 발생했다는 건 SYSTEM_PROMPT 의 강제력이 약하거나 특정 댓글 분포 (짧은 댓글, 비한국어 혼용 등) 에서 모델이 마크다운/설명 텍스트를 덧붙일 가능성을 시사. 재발 빈도 보고 SYSTEM_PROMPT 강화나 출력 검증 로직 개선을 후속 phase 후보로 잡을 만함.
+- ~~사용자가 마주친 스키마 에러 자체의 빈도를 확인할 필요.~~ → Finding #5 에서 원인 규명 + 적용 완료.
 - 비슷한 좀비 위험: `metaLoading` 에서의 retry. 현재 코드상 retry 시 stale controller 가 담긴 상태가 재진입돼서 Effect 2 의 의존성 변화가 의도대로 동작 안 할 수 있음. 사용자 임팩트는 낮음 (메타 서버 5xx 가 드묾) — 별도 후속 phase 에서 정리.
+
+### Finding #5 — Haiku 4.5 가 JSON 응답을 항상 ```json 마크다운 펜스로 감쌈 (HIGH) — RESOLVED (2026-05-14)
+
+**상태**: RESOLVED. `extractJsonObject` 헬퍼를 `src/services/claude.ts` 에 추가해 마크다운 펜스를 벗기고 JSON.parse 에 전달. 신규 unit test 3종 추가 (vitest 375 → 378).
+
+**발견 시점**: 2026-05-14, Finding #4 fix 적용 후 사용자가 영상 3개로 재시도했는데 셋 다 동일하게 `ClaudeSchemaError`. DevTools Network 의 `/v1/messages` 응답 본문을 캡처해 즉시 원인 확인.
+
+**증상**:
+- 모든 분석 호출에서 `JSON.parse` 가 첫 글자 ``` ` ``` 에서 실패 → 스키마 재시도(같은 패턴) 도 실패 → `ClaudeSchemaError` → 사용자 입장에선 "AI 응답 형식 오류" 가 100% 재현.
+- 자동 e2e / unit fixture 가 모두 `JSON.stringify(report)` 형태의 깨끗한 응답을 가정해서 못 잡음.
+
+**원인**:
+- `SYSTEM_PROMPT` 에 `반드시 JSON object만 출력. 추가 텍스트/마크다운 금지.` 가 명시돼있지만 Haiku 4.5 가 이를 일관되게 무시하고 응답을 ```json\n{...}\n``` 형태로 감쌈. 응답 본문 자체는 zod 스키마와 완전히 일치 (`summary` / `detectedLanguage` / `sentiment` 합 100 / `strengths` 등 모두 정상). **wrapper 한 줄 때문에 모든 분석이 100% 실패** 하고 있던 셈.
+- ADR-003 (prompt caching 폐기) 의 PoC 단계에선 응답 파싱까지 검증 못했고, claude.test.ts 의 fixture 5종도 모두 깨끗한 JSON 가정이라 회귀가 통과한 채로 step 5 가 완료됐던 것.
+
+**적용된 수정 (2026-05-14)**:
+1) `extractJsonObject(text)` 헬퍼 (`src/services/claude.ts`):
+   - 먼저 ```` ```(?:json)?\n...\n``` ```` 펜스를 정규식으로 매치해 내부만 추출.
+   - 매치 안 되면 첫 `{` 와 마지막 `}` 사이를 슬라이스 (앞뒤에 설명문이 섞이는 경우 대비).
+   - 둘 다 안 되면 원문 그대로 (happy-path).
+2) `tryParseReport` 가 `JSON.parse` 전에 항상 `extractJsonObject` 를 거치도록 연결.
+3) 테스트 3종 추가 — 펜스 with `json` 태그 / bare 펜스 / 앞뒤 prose.
+
+**부수 효과**:
+- 그동안 모든 호출이 스키마 재시도까지 가서 매 분석마다 API 호출이 2회씩 일어났음. 이제 happy-path 1회로 끝남. **사용자 키 비용이 ~50% 감소** 하는 부수 효과.
+
+**우선순위**: CRITICAL (실사용 100% 실패) → 즉시 적용 완료.
+
+**남은 follow-up (별도, 우선순위 낮음)**:
+- SYSTEM_PROMPT 의 "마크다운 금지" 지시가 무시되는 건 모델 특성 — `messages.create` 의 `response_format`/`tool use` 같은 더 강한 출력 강제 메커니즘으로 옮기는 안을 후속 phase 에서 검토할 만함. 다만 현재 `extractJsonObject` 가 견고하면 굳이 필요는 없음.
 
 ## 결론
 
 step 11 의 deliverables (4 specs + 3 fixtures + 이 리포트) 는 모두 작성 완료. Playwright 가 실제 production CSP 환경에서 회귀를 잡아낸 첫 사례 — Finding #1 은 ADR-032 의 가치를 즉시 증명한 셈.
 
-**2026-05-14 갱신**: Finding #1 (CSP BLOCKER), Finding #3 (cascading: e2e helper + hash 부트스트랩 캐시 미조회), Finding #4 (RESET_ERROR 좀비 상태) 모두 RESOLVED. Playwright 4/4 GREEN, vitest 375 PASS, lint/build 통과. Finding #4 는 자동 검증 그물(mock fixture 기반)이 못 잡고 수동 체크리스트가 잡은 첫 사례.
+**2026-05-14 갱신**: Finding #1 (CSP BLOCKER), Finding #3 (cascading: e2e helper + hash 부트스트랩 캐시 미조회), Finding #4 (RESET_ERROR 좀비 상태), Finding #5 (Haiku 4.5 마크다운 펜스로 인한 분석 100% 실패) 모두 RESOLVED. Playwright 4/4 GREEN, vitest 378 PASS, lint/build 통과. Finding #4/#5 는 자동 검증 그물(mock fixture 기반)이 못 잡고 수동 체크리스트가 잡은 두 건 — fixture 가 항상 "이상적인 응답" 만 가정한다는 한계가 명확히 드러난 셈.
