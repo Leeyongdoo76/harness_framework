@@ -92,6 +92,37 @@ describe("analyzeComments", () => {
     expect(mockCreate).toHaveBeenCalledTimes(2);
   });
 
+  it("markdown fence — ```json ... ``` wrapped response is unwrapped and accepted", async () => {
+    const wrapped = "```json\n" + JSON.stringify(validReport()) + "\n```";
+    mockCreate.mockResolvedValueOnce(textResponse(wrapped));
+
+    const result = await analyzeComments(COMMENTS, "sk-test");
+
+    expect(result.summary).toBe("전반적으로 긍정적인 반응이다.");
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it("markdown fence — bare ``` ... ``` (no language tag) is also unwrapped", async () => {
+    const wrapped = "```\n" + JSON.stringify(validReport()) + "\n```";
+    mockCreate.mockResolvedValueOnce(textResponse(wrapped));
+
+    const result = await analyzeComments(COMMENTS, "sk-test");
+
+    expect(result.summary).toBe("전반적으로 긍정적인 반응이다.");
+  });
+
+  it("leading/trailing prose — first-brace last-brace extraction recovers", async () => {
+    const noisy =
+      "다음은 분석 결과입니다:\n" +
+      JSON.stringify(validReport()) +
+      "\n도움이 되었기를 바랍니다.";
+    mockCreate.mockResolvedValueOnce(textResponse(noisy));
+
+    const result = await analyzeComments(COMMENTS, "sk-test");
+
+    expect(result.summary).toBe("전반적으로 긍정적인 반응이다.");
+  });
+
   it("fixture 2 — sentiment sum ≠ 100, then valid → schema retry recovers", async () => {
     const bad = JSON.stringify(
       validReport({ sentiment: { positive: 50, neutral: 30, negative: 30 } }),

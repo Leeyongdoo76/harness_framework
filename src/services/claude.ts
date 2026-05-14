@@ -113,10 +113,29 @@ function extractResponseText(response: Message): string | null {
   return first.text;
 }
 
+// Haiku 4.5 often wraps the JSON in a ```json ... ``` fence despite the
+// "마크다운 금지" directive in SYSTEM_PROMPT. Strip the fence (or fall back
+// to first-{ last-} extraction) before parsing so a perfectly valid payload
+// isn't rejected by the wrapper.
+const FENCE_RE = /^```(?:json)?\s*\n?([\s\S]*?)\n?```\s*$/i;
+
+export function extractJsonObject(text: string): string {
+  const trimmed = text.trim();
+  const fence = FENCE_RE.exec(trimmed);
+  if (fence && fence[1] !== undefined) return fence[1].trim();
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1);
+  }
+  return trimmed;
+}
+
 function tryParseReport(text: string): ParseOutcome {
+  const candidate = extractJsonObject(text);
   let parsed: unknown;
   try {
-    parsed = JSON.parse(text);
+    parsed = JSON.parse(candidate);
   } catch (e) {
     const detail = e instanceof Error ? e.message : String(e);
     return { ok: false, violation: `JSON.parse 실패: ${detail}` };
