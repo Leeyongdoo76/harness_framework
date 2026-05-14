@@ -16,7 +16,26 @@
 - Finding #3 (hash-restore 의 cascading 두 원인 — e2e helper + 제품의 hash 부트스트랩 캐시 미조회) RESOLVED.
 - step 11 의 "4/4 동일 원인" 진단은 부분적으로 부정확했음. CSP 차단이 가장 먼저 터지면서 그 뒤의 reload 단계까지 도달하지 못해 4건이 같은 stack 으로 죽어 보였던 것.
 
+## 현재 상태 (2026-05-14, 1-finish-verification phase 완료 후)
+
+- 자동 (Playwright): 약 35 test PASS — first-entry / url-input / smoke / hash-restore / mobile-viewport / csp-console / analyze-progress / result-detail / offline / error-recovery / a11y / page-meta / privacy
+- 자동 (vitest): 약 380 test PASS (copy SSOT 케이스 포함)
+- 수동 체크리스트: 자동화된 약 27 항목 [x], 사람-전용 잔여 5 항목 [ ] (아래 "사람-전용 잔여 항목" 섹션)
+
 ## 수동 체크리스트
+
+### 사람-전용 잔여 항목 (자동화 불가, 본인 브라우저 + OS 에서 확인 필요)
+
+이 항목들은 자동 검증으로 cover 가 안 되므로 사용자가 직접 확인해야 합니다.
+각 항목 옆에 `[x]` 또는 `[ ] (FAIL 이유)` 를 마킹하세요.
+
+- [ ] **focus ring 가시성** — 키보드 Tab 으로 돌아다닐 때 focus ring 이 모든 인터랙티브 element 에서 명확히 보임 (UI_GUIDE 의 `focus-visible:ring-2 ring-white/40` 규칙)
+- [ ] **Tab 만으로 모든 동작 가능** — 마우스 없이 키보드로 처음부터 끝까지 분석 진행 가능
+- [ ] **OS prefers-reduced-motion 진짜 동작** — Windows: 설정 > 접근성 > 시각 효과 > "애니메이션 효과" 끄기 / macOS: 시스템 설정 > 손쉬운 사용 > 동작 > "동작 줄이기" 켜기. 그 상태에서 결과 카드 진입 시 fade-in 이 정지하는지
+- [ ] **색맹 시뮬레이션** — Chrome DevTools > Rendering > "Emulate vision deficiencies" 에서 Deuteranopia 켠 다음, 결과 화면의 sentiment 차트와 키워드 태그의 의미가 색 없이도 전달되는지
+- [ ] **키 마스킹 시각적 자연스러움** — 설정 모달에서 키 마스킹 표현 (`••••••a8k2` 또는 type=password) 이 어색하지 않고 마지막 4자가 잘 보이는지
+
+각 항목을 확인하고 `[x]` 마킹. FAIL 인 항목이 있으면 본 보고서의 "발견 사항" 섹션에 Finding #N 으로 기록 + 우선순위 판정.
 
 ### 첫 진입
 - [x] 환영 카피(`welcome.intro`) 1줄 표시  ← tests/e2e/first-entry.spec.ts
@@ -67,9 +86,9 @@
 - [x] hash가 "분석 시작" 클릭 직후 갱신 (결과 도착 후 아님)  ← tests/e2e/page-meta.spec.ts
 
 ### 프라이버시
-- [ ] 키 표시는 마스킹 (마지막 4자만)
-- [ ] DevTools Network에 키가 다른 도메인으로 전송 안 됨
-- [ ] ErrorBoundary fallback에서 외부 전송 호출 없음 (Network 탭 확인)
+- [x] 키 표시는 마스킹 (마지막 4자만)  ← tests/e2e/privacy.spec.ts (`type="password"` + `••••••••<last4>` 표현 동시 검증)
+- [x] DevTools Network에 키가 다른 도메인으로 전송 안 됨  ← tests/e2e/privacy.spec.ts (전체 request 호스트가 `www.googleapis.com` / `youtube.googleapis.com` / `api.anthropic.com` / `i.ytimg.com` 외에는 0건)
+- [x] ErrorBoundary fallback에서 외부 전송 호출 없음 (Network 탭 확인)  ← src/components/ErrorBoundary.test.tsx ("does not transmit errors externally (no fetch)")
 
 ### PoC (사전 확인)
 - [x] step 5 시작 전 `npm run poc` 1회 성공 (step 0 에서 완료)
