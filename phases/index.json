@@ -9,6 +9,10 @@
       "dir": "1-finish-verification",
       "status": "completed",
       "completed_at": "2026-05-14T17:06:01+0900"
+    },
+    {
+      "dir": "1-deploy",
+      "status": "pending"
     }
   ]
 }

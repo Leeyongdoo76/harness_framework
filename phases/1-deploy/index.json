@@ -1,0 +1,9 @@
+{
+  "project": "YouTube Comment Analyzer",
+  "phase": "1-deploy",
+  "steps": [
+    { "step": 0, "name": "build-config-base-path", "status": "pending" },
+    { "step": 1, "name": "github-actions-workflow", "status": "pending" },
+    { "step": 2, "name": "docs-and-launch-checklist", "status": "pending" }
+  ]
+}
