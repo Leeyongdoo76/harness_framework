@@ -16,26 +16,24 @@
 - Finding #3 (hash-restore 의 cascading 두 원인 — e2e helper + 제품의 hash 부트스트랩 캐시 미조회) RESOLVED.
 - step 11 의 "4/4 동일 원인" 진단은 부분적으로 부정확했음. CSP 차단이 가장 먼저 터지면서 그 뒤의 reload 단계까지 도달하지 못해 4건이 같은 stack 으로 죽어 보였던 것.
 
-## 현재 상태 (2026-05-14, 1-finish-verification phase 완료 후)
+## 현재 상태 (2026-05-14, 1-finish-verification phase + 사람-전용 manual pass 완료 후)
 
-- 자동 (Playwright): 약 35 test PASS — first-entry / url-input / smoke / hash-restore / mobile-viewport / csp-console / analyze-progress / result-detail / offline / error-recovery / a11y / page-meta / privacy
-- 자동 (vitest): 약 380 test PASS (copy SSOT 케이스 포함)
-- 수동 체크리스트: 자동화된 약 27 항목 [x], 사람-전용 잔여 5 항목 [ ] (아래 "사람-전용 잔여 항목" 섹션)
+- 자동 (Playwright): **37 test PASS** — first-entry / url-input / smoke / hash-restore / mobile-viewport / csp-console / analyze-progress / result-detail / offline / error-recovery / a11y / page-meta / privacy
+- 자동 (vitest): **380 test PASS** (copy SSOT 케이스 포함)
+- 수동 체크리스트: 자동화된 항목 27/27 [x], 사람-전용 잔여 5/5 [x] (아래 섹션)
+- **0-mvp 검증 100% 완료** — 모든 항목 PASS, 신규 Finding 없음. 후속 phase 진행 가능 상태.
 
 ## 수동 체크리스트
 
 ### 사람-전용 잔여 항목 (자동화 불가, 본인 브라우저 + OS 에서 확인 필요)
 
-이 항목들은 자동 검증으로 cover 가 안 되므로 사용자가 직접 확인해야 합니다.
-각 항목 옆에 `[x]` 또는 `[ ] (FAIL 이유)` 를 마킹하세요.
+2026-05-14 사용자 manual pass 완료 — 모든 항목 PASS, 신규 Finding 없음.
 
-- [ ] **focus ring 가시성** — 키보드 Tab 으로 돌아다닐 때 focus ring 이 모든 인터랙티브 element 에서 명확히 보임 (UI_GUIDE 의 `focus-visible:ring-2 ring-white/40` 규칙)
-- [ ] **Tab 만으로 모든 동작 가능** — 마우스 없이 키보드로 처음부터 끝까지 분석 진행 가능
-- [ ] **OS prefers-reduced-motion 진짜 동작** — Windows: 설정 > 접근성 > 시각 효과 > "애니메이션 효과" 끄기 / macOS: 시스템 설정 > 손쉬운 사용 > 동작 > "동작 줄이기" 켜기. 그 상태에서 결과 카드 진입 시 fade-in 이 정지하는지
-- [ ] **색맹 시뮬레이션** — Chrome DevTools > Rendering > "Emulate vision deficiencies" 에서 Deuteranopia 켠 다음, 결과 화면의 sentiment 차트와 키워드 태그의 의미가 색 없이도 전달되는지
-- [ ] **키 마스킹 시각적 자연스러움** — 설정 모달에서 키 마스킹 표현 (`••••••a8k2` 또는 type=password) 이 어색하지 않고 마지막 4자가 잘 보이는지
-
-각 항목을 확인하고 `[x]` 마킹. FAIL 인 항목이 있으면 본 보고서의 "발견 사항" 섹션에 Finding #N 으로 기록 + 우선순위 판정.
+- [x] **focus ring 가시성** — 키보드 Tab 으로 돌아다닐 때 focus ring 이 모든 인터랙티브 element 에서 명확히 보임 (UI_GUIDE 의 `focus-visible:ring-2 ring-white/40` 규칙)
+- [x] **Tab 만으로 모든 동작 가능** — 마우스 없이 키보드로 처음부터 끝까지 분석 진행 가능
+- [x] **OS prefers-reduced-motion 진짜 동작** — Windows: 설정 > 접근성 > 시각 효과 > "애니메이션 효과" 끄기 / macOS: 시스템 설정 > 손쉬운 사용 > 동작 > "동작 줄이기" 켜기. 그 상태에서 결과 카드 진입 시 fade-in 이 정지함
+- [x] **색맹 시뮬레이션** — Chrome DevTools > Rendering > "Emulate vision deficiencies" 에서 Deuteranopia 켠 상태에서, sentiment 차트와 키워드 태그가 색 없이도 라벨로 의미 전달됨
+- [x] **키 마스킹 시각적 자연스러움** — 설정 모달에서 키 마스킹 표현이 자연스럽고 마지막 4자 식별 가능
 
 ### 첫 진입
 - [x] 환영 카피(`welcome.intro`) 1줄 표시  ← tests/e2e/first-entry.spec.ts
