@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "offline-and-error-recovery",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-14T16:41:42+0900",
+      "summary": "offline + error-recovery e2e (총 6 test), navigator.onLine mocking + 401/5xx 분기 + Finding #4 회귀 락",
+      "completed_at": "2026-05-14T16:53:00+0900"
     },
     {
       "step": 3,

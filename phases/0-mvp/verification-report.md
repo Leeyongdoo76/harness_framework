@@ -43,14 +43,14 @@
 - [x] 캐시 히트 시 "{시간} 전 분석 · 캐시된 결과" + 재분석 강조  ← tests/e2e/result-detail.spec.ts (+ hash-restore.spec.ts)
 
 ### 오프라인
-- [ ] DevTools Network → Offline 토글 → 상단 배너 노출
-- [ ] 분석 중 offline 진입 → 진행 중단 + 에러 표시
-- [ ] online 복귀 → 배너 사라짐
+- [x] DevTools Network → Offline 토글 → 상단 배너 노출  ← tests/e2e/offline.spec.ts
+- [x] 분석 중 offline 진입 → 진행 중단 + 에러 표시  ← tests/e2e/offline.spec.ts
+- [x] online 복귀 → 배너 사라짐  ← tests/e2e/offline.spec.ts
 
 ### 에러 복구
-- [ ] 잘못된 키로 분석 → AI_AUTH/YT_AUTH 에러 → 설정 모달 자동 오픈
-- [ ] 키 수정 후 저장 → previous 복귀 (idle 아님)
-- [ ] 에러 화면 "다시 시도" → previous 실행
+- [x] 잘못된 키로 분석 → AI_AUTH/YT_AUTH 에러 → 설정 모달 자동 오픈  ← tests/e2e/error-recovery.spec.ts
+- [x] 키 수정 후 저장 → previous 복귀 (idle 아님)  ← tests/e2e/error-recovery.spec.ts
+- [x] 에러 화면 "다시 시도" → previous 실행  ← tests/e2e/error-recovery.spec.ts (Finding #4 회귀 락)
 
 ### 접근성
 - [ ] Tab만으로 모든 동작 가능
