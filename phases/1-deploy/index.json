@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "github-actions-workflow",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-14T18:21:14+0900",
+      "summary": ".github/workflows/deploy.yml 작성 — main push 시 빌드 + GitHub Pages 자동 배포. 표준 actions/deploy-pages 패턴, OIDC 권한, concurrency 그룹.",
+      "completed_at": "2026-05-14T18:24:00+0900"
     },
     {
       "step": 2,
