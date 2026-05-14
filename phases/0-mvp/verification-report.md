@@ -170,8 +170,42 @@ Error: expect(locator).toBeVisible() failed
 
 **우선순위**: HIGH — BLOCKER 는 아니었으나 e2e 안전망 1/4 이 작동 안 했고, 사용자 입장에선 PRD 가 약속한 reload 자동 복원이 실제로는 안 됐던 셈.
 
+### Finding #4 — "다시 시도" 가 분석 파이프라인 에러 후에 좀비 상태로 빠짐 (HIGH) — RESOLVED (2026-05-14)
+
+**상태**: RESOLVED. reducer 의 `RESET_ERROR` 가 `fetching`/`analyzing`/`validating` 에서의 에러였을 때 `validating` 으로 재진입하도록 변경. 신규 unit test 3종 추가 (vitest 372 → 375).
+
+**발견 시점**: 2026-05-14, 수동 체크리스트 시작 단계. 사용자가 실제 API 키로 분석을 돌리다 `ClaudeSchemaError` 발생 → 화면에 한국어 에러 노출까지는 정상 동작 → "다시 시도" 클릭 후 "AI 분석 중…" 표시가 영원히 멈춰있는 현상.
+
+**증상**:
+- 첫 분석에서 AI 응답이 zod 스키마와 두 번 연속 불일치 → `ClaudeSchemaError` (retriable=false) → 에러 배너 노출 (`AI 응답 형식 오류가 반복되어 분석을 완료하지 못했습니다. 다시 시도해주세요.`)
+- "다시 시도" 클릭 → 에러 배너가 사라지고 `ProgressIndicator` ("AI 분석 중…") 등장
+- 그러나 DevTools Network 상으로는 `api.anthropic.com/v1/messages` 로의 새 요청이 **0개**. UI 만 진행중인 척.
+
+**원인**:
+- `FAILED` 처리: 에러 발생 직전 상태(`analyzing`)가 `state.previous` 에 보존되면서 `{ kind: "error", error, previous: analyzing-state }` 로 전이.
+- `RESET_ERROR` 처리: 단순히 `return state.previous` 라서 retry 시 `analyzing` 으로 그대로 복귀.
+- `App.tsx` 의 어떤 useEffect 도 `analyzing` 진입을 트리거로 새 호출을 시작하지 않음 (Effect 3 은 `validating` 에만 반응). 따라서 좀비 진행상태.
+- 자동 e2e 와 unit test 가 잡지 못한 이유: 둘 다 mock fixture 기반이라 Claude 응답이 항상 스키마에 맞음 → 스키마 위반 경로 자체를 트리거하지 못했음.
+
+**적용된 수정 (2026-05-14)**:
+
+`src/lib/reducer.ts::RESET_ERROR` 가 `state.previous.kind` 가 `fetching`/`analyzing`/`validating` 중 하나면 새 `validating` 상태로 재진입하도록 변경. 같은 `videoId` + 보존된 `videoMeta` 를 그대로 사용. Effect 3 이 다시 발화하면서 fetch + analyze 가 처음부터 다시 돌아감.
+
+다른 `previous.kind` (예: `idle`, `metaReady`) 는 기존대로 그대로 복귀 — `KEYS_SAVED` 자동 복귀 같은 다른 흐름의 의미는 영향 받지 않음.
+
+**보강된 테스트**:
+- `RESET_ERROR after analyzing → re-enters validating (not zombie analyzing)`
+- `RESET_ERROR after fetching → re-enters validating`
+- `RESET_ERROR after validating (no meta) → re-enters validating without meta`
+
+**우선순위**: HIGH — UX 데드락 (사용자가 페이지 새로고침 외에는 빠져나갈 수 없음). 실제 키로만 재현돼서 자동 검증 그물을 통과해버린 케이스.
+
+**남은 follow-up (별도)**:
+- 사용자가 마주친 스키마 에러 자체의 빈도를 확인할 필요. 첫 시도에서 발생했다는 건 SYSTEM_PROMPT 의 강제력이 약하거나 특정 댓글 분포 (짧은 댓글, 비한국어 혼용 등) 에서 모델이 마크다운/설명 텍스트를 덧붙일 가능성을 시사. 재발 빈도 보고 SYSTEM_PROMPT 강화나 출력 검증 로직 개선을 후속 phase 후보로 잡을 만함.
+- 비슷한 좀비 위험: `metaLoading` 에서의 retry. 현재 코드상 retry 시 stale controller 가 담긴 상태가 재진입돼서 Effect 2 의 의존성 변화가 의도대로 동작 안 할 수 있음. 사용자 임팩트는 낮음 (메타 서버 5xx 가 드묾) — 별도 후속 phase 에서 정리.
+
 ## 결론
 
 step 11 의 deliverables (4 specs + 3 fixtures + 이 리포트) 는 모두 작성 완료. Playwright 가 실제 production CSP 환경에서 회귀를 잡아낸 첫 사례 — Finding #1 은 ADR-032 의 가치를 즉시 증명한 셈.
 
-**2026-05-14 갱신**: Finding #1 (CSP BLOCKER) 과 Finding #3 (cascading: e2e helper + hash 부트스트랩 캐시 미조회) 모두 RESOLVED. Playwright 4/4 GREEN, vitest 372 PASS, lint/build 통과. step 11 의 "4/4 동일 원인" 진단이 부분적으로 부정확했던 이유는 보고서 본문에 정리.
+**2026-05-14 갱신**: Finding #1 (CSP BLOCKER), Finding #3 (cascading: e2e helper + hash 부트스트랩 캐시 미조회), Finding #4 (RESET_ERROR 좀비 상태) 모두 RESOLVED. Playwright 4/4 GREEN, vitest 375 PASS, lint/build 통과. Finding #4 는 자동 검증 그물(mock fixture 기반)이 못 잡고 수동 체크리스트가 잡은 첫 사례.
