@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-05-14T16:32:34+0900",
       "summary": "analyze-progress + result-detail e2e (총 6 test) + fixture-few 2종 추가, verification-report 7개 항목 자동 검증 마킹",
-      "completed_at": "2026-05-14T16:41:05+0900"
+      "completed_at": "2026-05-14T16:41:42+0900"
     },
     {
       "step": 2,
