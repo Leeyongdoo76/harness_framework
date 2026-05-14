@@ -7,7 +7,8 @@
       "name": "build-config-base-path",
       "status": "completed",
       "started_at": "2026-05-14T18:11:39+0900",
-      "summary": "vite.config.ts base 분기 ('/harness_framework/' on build, '/' on serve), dist 빌드 결과 검증, 기존 dev/test 흐름 영향 없음"
+      "summary": "vite.config.ts base 분기 ('/harness_framework/' on build, '/' on serve), dist 빌드 결과 검증, 기존 dev/test 흐름 영향 없음",
+      "completed_at": "2026-05-14T18:21:13+0900"
     },
     {
       "step": 1,
