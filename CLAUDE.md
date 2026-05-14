@@ -168,7 +168,7 @@ services → types
 - 외부 링크는 `target="_blank" rel="noopener noreferrer"`.
 - CSP 메타 태그 (`index.html`):
   - `default-src 'self'`
-  - `connect-src 'self' https://youtube.googleapis.com https://api.anthropic.com`
+  - `connect-src 'self' https://www.googleapis.com https://youtube.googleapis.com https://api.anthropic.com`
   - `style-src 'self' 'unsafe-inline'` (Tailwind)
   - `img-src 'self' https://i.ytimg.com data:`
 - 사용자 입력 URL은 fetch에 직접 안 넣음 — videoId 추출 후 API URL 템플릿화.

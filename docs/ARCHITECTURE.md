@@ -523,7 +523,7 @@ await client.messages.create({
   base-uri 'none';
   object-src 'none';
   form-action 'none';
-  connect-src 'self' https://youtube.googleapis.com https://api.anthropic.com;
+  connect-src 'self' https://www.googleapis.com https://youtube.googleapis.com https://api.anthropic.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' https://i.ytimg.com data:;
   font-src 'self';
